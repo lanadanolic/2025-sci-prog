@@ -127,6 +127,21 @@ Forward Pass:          output = W·x + A·B·x
 
 ---
 
+# Gradients and Optimization
+
+**What is a gradient?**
+- Direction and magnitude to adjust each parameter to reduce loss
+- Think of it like a compass pointing downhill
+- If loss is a mountain, gradient points toward the valley
+
+**How training works:**
+1. Compute gradient of loss w.r.t. every weight
+2. Update each weight by taking a small step to reduce loss
+3. Step size controlled by **learning rate**
+4. Backward pass (gradients) + forward pass (loss) = training loop core
+
+---
+
 # SL for LLMs
 
 **For LLMs:**
@@ -200,16 +215,14 @@ Forward Pass:          output = W·x + A·B·x
 # Training Data Requirements
 
 **Supervised Learning:**
-- Prompt/completion pairs
-- Quality matters more than quantity
-- Typical: 1K-100K examples
-- Format: conversational messages or raw text
+- Prompt/completion pairs (1K-100K examples)
+- Quality over quantity
+- Format: conversational or raw text
 
 **Reinforcement Learning:**
-- Just prompts (model generates completions)
-- Reward function or preference data
-- More data usually needed (10K-1M prompts)
-- Can generate multiple completions per prompt
+- Prompts only (model generates completions)
+- Reward function or preference data (10K-1M prompts)
+- Multiple completions per prompt
 
 ---
 
@@ -917,23 +930,18 @@ class Env:
 
 # Reward Functions
 
-**Simple example (GSM8K math):**
+**GSM8K math example:**
 
 ```python
-def compute_reward(question: str, answer: str) -> float:
-    # Extract numerical answer
+def compute_reward(answer: str) -> float:
     predicted = extract_number(answer)
-    correct = extract_number(ground_truth)
-
-    # Base reward
     reward = 1.0 if predicted == correct else 0.0
-
-    # Bonus for formatting
     if has_boxed_answer(answer):
         reward += 0.1
-
     return reward
 ```
+
+**Key idea:** +1 for correct, +0.1 bonus for proper formatting
 
 ---
 
@@ -970,15 +978,10 @@ def compute_reward(question: str, answer: str) -> float:
 
 ```python
 # Sample completions
-responses = training.sample(
-    prompts=batch_prompts,
-    params={"temperature": 1.0, "max_tokens": 512}
-)
+responses = training.sample(prompts, {"temperature": 1.0})
 
-# Compute rewards
+# Score and create training data
 rewards = [compute_reward(r) for r in responses]
-
-# Create training data
 data = create_rl_data(responses, rewards, advantages)
 ```
 
@@ -1077,21 +1080,18 @@ class TwentyQuestionsEnv(Env):
 
 # Math RL Environment
 
-Let's look at a real `MathEnv` from the cookbook:
+**Real `MathEnv` from cookbook:**
 
 ```python
 class MathEnv(ProblemEnv):
     def get_question(self) -> str:
-        return self.problem + " Write answer in \\boxed{}."
+        return self.problem + " Write in \\boxed{}."
 
-    def check_format(self, sample_str: str) -> bool:
-        # Check if response has \boxed{...}
-        return has_boxed(sample_str)
+    def check_format(self, sample: str) -> bool:
+        return has_boxed(sample)
 
-    def check_answer(self, sample_str: str) -> bool:
-        # Extract and grade answer
-        answer = extract_boxed(sample_str)
-        return safe_grade(answer, self.answer)
+    def check_answer(self, sample: str) -> bool:
+        return safe_grade(extract_boxed(sample), self.answer)
 ```
 
 ---
@@ -1278,19 +1278,11 @@ The cookbook is organized into recipe families, each demonstrating a different t
 
 # Recipe Categories
 
-**1. Chat SFT** (`chat_sl/`)
-- Supervised fine-tuning on conversational datasets
-- Datasets: Tulu3, NoRobots
-- Use case: Training chat models, instruction following
+**1. Chat SFT** - Supervised fine-tuning on chat datasets (Tulu3, NoRobots)
 
-**2. Math RL** (`math_rl/`)
-- RL for mathematical reasoning
-- Datasets: GSM8K, MATH, arithmetic
-- Reward: Correct answer in `\boxed{}` format
+**2. Math RL** - Mathematical reasoning with verifiable rewards (GSM8K, MATH)
 
-**3. Preference Learning** (`preference/`)
-- Learning from human preferences (RLHF, DPO)
-- Methods: DPO, RLHF, "Shorter" example
+**3. Preference Learning** - RLHF and DPO from human preferences
 
 ---
 
@@ -1319,19 +1311,13 @@ The cookbook is organized into recipe families, each demonstrating a different t
 
 # "Basic" vs "Loop" Scripts
 
-Each approach has two entry points:
-
-**`sl_basic.py` / `rl_basic.py` (Recommended)**
-- Uses cookbook abstractions
-- Configurable via CLI
-- Production-ready features (checkpointing, metrics, W&B)
-- **Start here for real projects**
+**`sl_basic.py` / `rl_basic.py` (Production)**
+- Full-featured: checkpointing, metrics, W&B
+- Start here for real projects
 
 **`sl_loop.py` / `rl_loop.py` (Educational)**
-- Minimal, flat training loops
-- Direct Tinker API usage
-- ~150-200 lines of readable code
-- **Use to understand what's happening under the hood**
+- Minimal ~150 line training loops
+- Direct API usage to understand internals
 
 ---
 
@@ -1515,17 +1501,13 @@ training.load_state(uri)
 # Summary (3/3)
 
 **Part 4: Reinforcement Learning**
-- RL environments and reward functions
-- Concrete Math RL example with MathEnv
-- Group-based training (GRPO) for efficiency
+- RL environments, rewards, and GRPO
 
 **Part 5: Preferences & RLHF**
-- DPO: direct preference optimization
-- RLHF: two-stage process with reward models
+- DPO and RLHF with reward models
 
 **Part 6: The Cookbook**
-- 7 recipe families for different use cases
-- "Basic" vs "Loop" scripts
+- 7 recipe families with production and educational scripts
 
 ---
 
