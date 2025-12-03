@@ -1,0 +1,28 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.18.1"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "64f46c1bedf51f5cf13a2c86ed877286",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "\n====== ITERACIJA 1 ======\n\n---\nPitanje: Ispred jedne patke su dvije patke, iza jedne patke dvije patke i jedna patka u sredini. Koliko pataka ima?\nStudent: **Translation:**\nIn front of a duck are two ducks, behind a duck two ducks, and one duck in the middle. How many ducks are there?\n\n**Answer:**\nThis is a classic logic puzzle that plays on perspective. The key is to realize that the descriptions refer to the *same* group of ducks, viewed from different positions within the group.\n\nLet's assume the ducks are arranged in a single line:\n\n1.  **\"In front of a duck are two ducks\"**: This means if you look at the last duck in the line, there are two ducks ahead of it.\n2.  **\"Behind a duck two ducks\"**: This means if you look at the first duck in the line, there are two ducks behind it.\n3.  **\"And one duck in the middle\"**: This confirms there is a duck positioned between others.\n\nIf we place three ducks in a line:\n**Duck 1 - Duck 2 - Duck 3**\n\n*   **\"In front of a duck are two ducks\"**: If we consider Duck 3 as \"a duck\", then Duck 1 and Duck 2 are in front of it. (2 ducks)\n*   **\"Behind a duck two ducks\"**: If we consider Duck 1 as \"a duck\", then Duck 2 and Duck 3 are behind it. (2 ducks)\n*   **\"And one duck in the middle\"**: Duck 2 is exactly in the middle. (1 duck)\n\nAll conditions are met with exactly three ducks.\n\n**There are 3 ducks.**\nJudge: {'correct': True, 'reason': 'The student correctly identified the answer as 3 and provided a clear, logical explanation that satisfies all conditions of the riddle.'}\n\n---\nPitanje: Pet osoba jelo je jabuke. A je zavr\u0161io prije B, ali iza C. D je zavr\u0161io prije E, ali iza B. Koji je redoslijed zavr\u0161avanja?\nStudent: Translation:\nFive people ate apples. A finished before B, but after C. D finished before E, but after B. What is the order of finishing?\n\nAnswer:\nLet's break down the given information:\n\n1.  \"A finished before B, but after C.\"\n    This tells us the sequence C, then A, then B. We can represent this as:\n    C > A > B\n\n2.  \"D finished before E, but after B.\"\n    This tells us the sequence B, then D, then E. We can represent this as:\n    B > D > E\n\nNow, we combine these two sequences. Notice that 'B' is the linking element in both.\nWe have:\nC > A > B\nand\nB > D > E\n\nBy combining them, we get the complete sequence from first to last:\nC > A > B > D > E\n\nTherefore, the order of finishing is: **C, A, B, D, E** (from first to last).\nJudge: {'correct': True, 'reason': 'The student correctly interpreted the two conditions, derived the partial sequences (C > A > B and B > D > E), and correctly combined them to arrive at the final correct order.'}\n\n---\nPitanje: \u010covjek ima 53 \u010darape u ladici: 21 plavu, 15 crnih i 17 crvenih. Mrak je i ne mo\u017ee vidjeti boje. Koliko \u010darapa mora izvaditi da bude 100% siguran da ima barem jedan par crnih?\nStudent: **Translation:**\nA man has 53 socks in a drawer: 21 blue, 15 black, and 17 red. It's dark and he cannot see the colors. How many socks must he take out to be 100% sure that he has at least one pair of black socks?\n\n**Answer:**\n\nTo be 100% sure of having at least one pair of black socks, we must consider the worst possible luck. This means he first picks all the socks that are not black, and then he picks individual black socks before getting a pair.\n\n1.  **Worst-case scenario for non-black socks:** He could first pick all the blue socks and all the red socks.\n    *   Number of blue socks: 21\n    *   Number of red socks: 17\n    *   Total non-black socks: $21 + 17 = 38$ socks.\n    After pulling out 38 socks, he still has no black socks.\n\n2.  **Worst-case scenario for black socks (not yet a pair):** After exhausting all the non-black socks, the next sock he pulls must be black. However, this is only one black sock, not yet a pair.\n    *   He picks 1 black sock.\n\n3.  **Guaranteeing a pair:** The very next sock he picks *must* also be black (since all non-black socks have been removed, and he's already picked one black sock). This will complete a pair of black socks.\n    *   He picks 1 more black sock.\n\nTherefore, the total number of socks he must take out is:\n$38 \\text{ (all blue and red)} + 1 \\text{ (first black sock)} + 1 \\text{ (second black sock, completing the pair)} = 40 \\text{ socks.}$\n\nHe must take out **40** socks to be 100% sure that he has at least one pair of black socks.\nJudge: {'correct': True, 'reason': 'The student correctly identifies the worst-case scenario by first drawing all non-black socks (21 blue + 17 red = 38) and then adding the two black socks required to guarantee a pair.'}\n\n---\nPitanje: Dan prije dva dana nakon dana prije sutra je subota. Koji je danas dan?\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    }
+  ]
+}
