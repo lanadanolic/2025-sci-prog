@@ -1,110 +1,219 @@
-# Generiranje sintetičkih vijesti pomocu LLM-ova
+# Usporedba modela za detekciju manipuliranih vijesti prije i nakon LLM augmentacije
 
 ## Opis projekta
 
-Ovaj projekt istražuje **generiranje sintetičkih (fake) vijesti** pomoću **velikih jezičnih modela (LLM-ova)** koristeći stvarne datasetove vijesti. Cilj je razviti **reproducibilan pipeline** koji uzima stvarne vijesti i generira stilizirane, namjerno izmijenjene članke. Projekt je edukativnog karaktera i naglašava metodologiju prompt engineeringa, preprocesiranje podataka i sigurnu generaciju sadržaja.  
+Cilj projekta je ispitati može li LLM-generirana augmentacija podataka poboljšati prepoznavanje manipuliranih vijesti.
 
-Primjenom ovog projekta moguće je:
-- Razviti razumijevanje rada LLM-ova u kontekstu generiranja teksta
-- Analizirati razlike između stvarnih i sintetičkih vijesti
-- Eksperimentirati s različitim promptovima i parametrima modela
+Uspoređuju se dva modela:
 
----
+- **Baseline model** – treniran samo na originalnim podacima
+- **Augmented model** – treniran na originalnim i sintetički generiranim podacima
 
-## Dataset
+Oba modela koriste isti klasifikacijski pristup:
 
-Primarni dataset koristi **BBC News CSV** dostupan na Kaggleu:  
-[https://www.kaggle.com/datasets/gpreda/bbc-news](https://www.kaggle.com/datasets/gpreda/bbc-news)  
+- word-level TF-IDF
+- character-level TF-IDF
+- LinearSVC
 
-Sadrži sljedeća polja (struktura CSV datoteke):
-| Polje       | Opis                         |
-|------------|------------------------------|
-| `title`    | Naslov vijesti               |
-| `pubDate`  | Datum objave                |
-| `guid`     | Jedinstveni identifikator   |
-| `link`     | URL članka                  |
-| `description` | Kratki sadržaj vijesti    |
+Promatraju se tri vrste manipulacije:
 
-Dataset se može koristiti kao ulaz za generiranje sintetičkih vijesti.  
+- `fact_change` – promjena jedne činjenice
+- `clickbait` – senzacionalistička promjena naslova
+- `tone_shift` – promjena tona teksta
 
----
+Za generiranje sintetičkih trening podataka koristi se `gemini-3.5-flash-lite`, dok se challenge test generira pomoću `gemini-3.5-flash`.
 
-## Ciljevi projekta
+## Podaci
 
-1. **Prikupljanje i preprocesiranje podataka**
-   - Čišćenje CSV/RSS podataka
-   - Normalizacija tekstualnih polja (`title`, `description`)
-   - Tokenizacija i segmentacija teksta prema potrebi
+Koristi se ISOT Fake News Dataset koji sadrži:
 
-2. **Prompt engineering**
-   - Razvijanje promptova za LLM za generiranje sintetičkih vijesti
-   - Testiranje različitih stilova, tonova i duljina
+- `True.csv` – stvarne vijesti
+- `Fake.csv` – lažne vijesti
 
-3. **Generacija sintetičkih vijesti**
-   - Korištenje LLM-a lokalno ili putem API-ja (npr. OpenAI, HuggingFace, Ollama)
-   - Kontrola parametara generacije (temperature, max tokens, top_p)
+Nakon čišćenja podaci se dijele na:
 
-4. **Evaluacija i analiza**
-   - Usporedba sintetičkih i stvarnih vijesti
-   - Detekcija sličnosti i stilskih promjena
-   - Mogućnost vizualizacije distribucije tema i stilova
+- 80 % train
+- 20 % test
 
-5. **Reproducibilan pipeline**
-   - Google Colab notebook za jednostavno izvođenje
-   - Jasan workflow od input CSV do generiranih sintetičkih članaka
-   - Dokumentirani koraci s primjerima koda
+Sintetički trening podaci generiraju se samo iz stvarnih vijesti iz train skupa.
 
----
+## Struktura projekta
 
-## Tehnologije
+```text
+syntheticnewswithLLMs-ldanolic/
+│
+├── data/
+│   ├── raw/
+│   │   ├── Fake.csv
+│   │   └── True.csv
+│   │
+│   └── processed/
+│       ├── train.csv
+│       ├── test.csv
+│       ├── synthetic_train.csv
+│       ├── augmented_train.csv
+│       └── challenge_test.csv
+│
+├── models/
+│   ├── baseline_model.joblib
+│   └── augmented_model.joblib
+│
+├── notebooks/
+│   ├── 01_data_preparation.ipynb
+│   ├── 02_synthetic_generation.ipynb
+│   └── 03_training_evaluation.ipynb
+│
+├── results/
+│   ├── challenge_metrics.csv
+│   └── figures/
+│       └── challenge_comparison.png
+│
+├── src/
+│   ├── __init__.py
+│   ├── preprocessing.py
+│   ├── generation.py
+│   ├── modeling.py
+│   └── evaluation.py
+│
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 
-- **Python 3.13**
-- **Pandas / NumPy** – preprocesiranje i analiza podataka
-- **Google Colab** – razvojno okruženje
-- **LLM API ili lokalni LLM** – generacija sintetičkog sadržaja
-- **Markdown / Jupyter Notebooks** – dokumentacija i vizualizacija workflowa
+## Pokretanje projekta
 
----
+Projekt je potrebno otvoriti iz glavnog direktorija
 
-## Generacija sintetičke vijesti (pseudo-kod)
+### 1. Instalacija biblioteka
 
-'''python
-from llm_api import generate_text
+U terminalu pokrenuti:
 
-prompt = f"Na temelju ovog članka generiraj stilizirani, izmijenjeni tekst: {df['description'][0]}"
-synthetic_article = generate_text(prompt, temperature=0.7, max_tokens=300)
-print(synthetic_article)
+```bash
+pip install -r requirements.txt
+```
 
----
+### 2. Gemini API ključ
 
-## Sigurnosna i etička razmatranja
+Ako se sintetički podaci ponovno generiraju, u glavnom direktoriju projekta potrebno je napraviti `.env` datoteku:
 
-Projekt nije namijenjen za širenje dezinformacija
-Sintetičke vijesti su stilizirane i jasno označene kao generirane
-Promovira istraživački i edukativni pristup LLM-ovima
+```text
+GEMINI_API_KEY=vas_api_kljuc
+```
 
----
+Datoteka `.env` nije uključena u Git repozitorij.
 
-## Prompt engineering i generacija sintetičkih vijesti
+### 3. Pokretanje notebookova
 
-Primjer prompta:
+Notebookovi se pokreću sljedećim redoslijedom:
 
-Na temelju sljedećeg članka generiraj sintetički tekst:
-{description}
-Uvijek zadrži ton informativnosti, ali izmijeni detalje i stil.
+```text
+01_data_preparation.ipynb
+02_synthetic_generation.ipynb
+03_training_evaluation.ipynb
+```
 
----
+#### `01_data_preparation.ipynb`
 
-## Primjeri rezultata
+Učitava `Fake.csv` i `True.csv`, čisti podatke, dodjeljuje labele te radi podjelu na train i test skup.
 
-Stvarni članak:
-"The government has announced new policies to reduce carbon emissions by 2030"
+Nastaju:
 
-Sintetički članak (generiran LLM-om):
-"Officials introduced fresh initiatives aimed at lowering greenhouse gases, with a target set for 2030. The new policies emphasize sustainable energy and urban planning"
+```text
+data/processed/train.csv
+data/processed/test.csv
+```
 
----
+#### `02_synthetic_generation.ipynb`
 
-## Autor
+Iz stvarnih vijesti train skupa generiraju se sintetičke manipulacije pomoću LLM-a.
 
-Lana Danolić
+Nastaju:
+
+```text
+data/processed/synthetic_train.csv
+data/processed/augmented_train.csv
+data/processed/challenge_test.csv
+```
+
+Challenge test generira se iz stvarnih vijesti test skupa pomoću drugog LLM modela.
+
+#### `03_training_evaluation.ipynb`
+
+Baseline model trenira se na `train.csv`, dok se Augmented model trenira na `augmented_train.csv`.
+
+Modeli se spremaju u:
+
+```text
+models/baseline_model.joblib
+models/augmented_model.joblib
+```
+
+Nakon toga oba modela evaluiraju se na tri challenge testa:
+
+- `fact_change`
+- `clickbait`
+- `tone_shift`
+
+Računaju se Accuracy, Precision, Recall i F1.
+
+Rezultati se spremaju u:
+
+```text
+results/challenge_metrics.csv
+results/figures/challenge_comparison.png
+```
+
+## Pokretanje bez ponovnog LLM generiranja i treniranja
+
+U repozitoriju su već spremljeni generirani podaci i istrenirani modeli, pa za pregled i ponovnu evaluaciju nije potrebno ponovno pozivati Gemini niti ponovno trenirati modele.
+
+U `02_synthetic_generation.ipynb` mogu se učitati već generirani podaci:
+
+```python
+synthetic_train = pd.read_csv(
+    "data/processed/synthetic_train.csv"
+)
+
+challenge_test = pd.read_csv(
+    "data/processed/challenge_test.csv"
+)
+```
+
+U tom slučaju ne pokreću se ćelije koje pozivaju:
+
+```python
+generate_synthetic_dataset(...)
+```
+
+U `03_training_evaluation.ipynb` spremljeni modeli mogu se učitati pomoću:
+
+```python
+baseline_model = joblib.load(
+    "models/baseline_model.joblib"
+)
+
+augmented_model = joblib.load(
+    "models/augmented_model.joblib"
+)
+```
+
+Tada nije potrebno ponovno pokretati:
+
+```python
+baseline_model.fit(...)
+augmented_model.fit(...)
+```
+
+Nakon učitavanja spremljenih modela može se ponovno pokrenuti evaluacija, izračunati metrike i generirati graf rezultata.
+
+## Rezultati
+
+| Vrsta manipulacije | Baseline F1 | Augmented F1 | Poboljšanje |
+|---|---:|---:|---:|
+| Clickbait | 0.99 % | 66.45 % | +65.46 p.b. |
+| Fact change | 0.99 % | 1.97 % | +0.98 p.b. |
+| Tone shift | 31.09 % | 96.92 % | +65.83 p.b. |
+
+Najveće poboljšanje ostvareno je kod `clickbait` i `tone_shift` manipulacija. Kod `fact_change` manipulacije rezultat je ostao nizak jer se mijenja samo manji dio sadržaja, dok ostatak teksta ostaje gotovo jednak originalnoj vijesti.
+
+!!!!!!!!!!!!! Datoteke `train.csv` i `augmented_train.csv` nisu uključene u repozitorij zbog njihove veličine, jer su veće od 100 MB. Mogu se ponovno izraditi pokretanjem notebookova..
